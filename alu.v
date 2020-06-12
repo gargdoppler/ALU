@@ -1,152 +1,178 @@
 `include "modules.v"
 
-module alu(clk, A, B, opcode, O);
+
+module alu(clk, A, B, OpCode, O);
+
+	/* Assign wires and registers to the inputs and outputs */
+
+	// input clk
 	input clk;
-	input [31:0] A, B;
-	input [1:0] opcode;
+
+	// input OpCode
+	input [1:0] OpCode;
+
+	// input A
+	input [31:0] A; 
+	wire [7:0] ExponentA;
+	wire [23:0] MantissaA;
+	reg [31:0] InputAdderA;
+	reg [31:0] InputMultiplierA;
+	reg [31:0] InputDividerA;
+	
+	// input B
+	input [31:0] B;
+	wire [7:0] ExponentB;
+	wire [23:0] MantissaB;
+	reg [31:0] InputAdderB;
+	reg [31:0] InputMultiplierB;
+	reg [31:0] InputDividerB;
+
+    // output O
 	output [31:0] O;
-
 	wire [31:0] O;
-	wire [7:0] a_exponent;
-	wire [23:0] a_mantissa;
-	wire [7:0] b_exponent;
-	wire [23:0] b_mantissa;
-
-	reg        o_sign;
-	reg [7:0]  o_exponent;
-	reg [24:0] o_mantissa;
+	reg        SignO;
+	reg [7:0]  ExponentO;
+	reg [24:0] MantissaO;
+	wire [31:0] OutputAdder;
+	wire [31:0] OutputMultiplier;
+	wire [31:0] OutputDivider;
 
 
-	reg [31:0] adder_a_in;
-	reg [31:0] adder_b_in;
-	wire [31:0] adder_out;
+	/* Assign values*/
+	
+	// A
+	assign SignA = A[31];
+	assign ExponentA[7:0] = A[30:23];
+	assign MantissaA[23:0] = {1'b1, A[22:0]};
+	
+	// B
+	assign SignB = B[31];
+	assign ExponentB[7:0] = B[30:23];
+	assign MantissaB[23:0] = {1'b1, B[22:0]};
 
-	reg [31:0] multiplier_a_in;
-	reg [31:0] multiplier_b_in;
-	wire [31:0] multiplier_out;
+	// O
+	assign O[31] = SignO;
+	assign O[30:23] = ExponentO;
+	assign O[22:0] = MantissaO[22:0];
 
-	reg [31:0] divider_a_in;
-	reg [31:0] divider_b_in;
-	wire [31:0] divider_out;
+	/* Choose operations based on OpCode */
+	assign ADD = !OpCode[1] & !OpCode[0];
+	assign SUB = !OpCode[1] & OpCode[0];
+	assign DIV = OpCode[1] & !OpCode[0];
+	assign MUL = OpCode[1] & OpCode[0];
 
-	assign O[31] = o_sign;
-	assign O[30:23] = o_exponent;
-	assign O[22:0] = o_mantissa[22:0];
 
-	assign a_sign = A[31];
-	assign a_exponent[7:0] = A[30:23];
-	assign a_mantissa[23:0] = {1'b1, A[22:0]};
-
-	assign b_sign = B[31];
-	assign b_exponent[7:0] = B[30:23];
-	assign b_mantissa[23:0] = {1'b1, B[22:0]};
-
-	assign ADD = !opcode[1] & !opcode[0];
-	assign SUB = !opcode[1] & opcode[0];
-	assign DIV = opcode[1] & !opcode[0];
-	assign MUL = opcode[1] & opcode[0];
-
+	/* Connect modules to inputs and corresponding output wires */
 	adder A1
 	(
-		.a(adder_a_in),
-		.b(adder_b_in),
-		.out(adder_out)
+		.A(InputAdderA),
+		.B(InputAdderB),
+		.out(OutputAdder)
 	);
 
 	multiplier M1
 	(
-		.a(multiplier_a_in),
-		.b(multiplier_b_in),
-		.out(multiplier_out)
+		.A(InputMultiplierA),
+		.B(InputMultiplierB),
+		.out(OutputMultiplier)
 	);
 
 	divider D1
 	(
-		.a(divider_a_in),
-		.b(divider_b_in),
-		.out(divider_out)
+		.A(InputDividerA),
+		.B(InputDividerB),
+		.out(OutputDivider)
 	);
 
+	/* Main logic*/
 	always @ (posedge clk) begin
+
+		// OpCode = ??? (Addition)
 		if (ADD) begin
-			//If a is NaN or b is zero return a
-			if ((a_exponent == 255 && a_mantissa != 0) || (b_exponent == 0) && (b_mantissa == 0)) begin
-				o_sign = a_sign;
-				o_exponent = a_exponent;
-				o_mantissa = a_mantissa;
-			//If b is NaN or a is zero return b
-			end else if ((b_exponent == 255 && b_mantissa != 0) || (a_exponent == 0) && (a_mantissa == 0)) begin
-				o_sign = b_sign;
-				o_exponent = b_exponent;
-				o_mantissa = b_mantissa;
-			//if a or b is inf return inf
-			end else if ((a_exponent == 255) || (b_exponent == 255)) begin
-				o_sign = a_sign ^ b_sign;
-				o_exponent = 255;
-				o_mantissa = 0;
-			end else begin // Passed all corner cases
-				adder_a_in = A;
-				adder_b_in = B;
-				o_sign = adder_out[31];
-				o_exponent = adder_out[30:23];
-				o_mantissa = adder_out[22:0];
+			//If A is NaN or B is zero return A
+			if ((ExponentA == 255 && MantissaA != 0) || (ExponentB == 0) && (MantissaB == 0)) begin
+				SignO = SignA;
+				ExponentO = ExponentA;
+				MantissaO = MantissaA;
+			//If B is NaN or A is zero return B
+			end else if ((ExponentB == 255 && MantissaB != 0) || (ExponentA == 0) && (MantissaA == 0)) begin
+				SignO = SignB;
+				ExponentO = ExponentB;
+				MantissaO = MantissaB;
+			//if A or B is inf return inf
+			end else if ((ExponentA == 255) || (ExponentB == 255)) begin
+				SignO = SignA ^ SignB;
+				ExponentO = 255;
+				MantissaO = 0;
+			end else begin
+				InputAdderA = A;
+				InputAdderB = B;
+				SignO = OutputAdder[31];
+				ExponentO = OutputAdder[30:23];
+				MantissaO = OutputAdder[22:0];
 			end
+		
+		// Opcode = ??? (Subtraction)
 		end else if (SUB) begin
-			//If a is NaN or b is zero return a
-			if ((a_exponent == 255 && a_mantissa != 0) || (b_exponent == 0) && (b_mantissa == 0)) begin
-				o_sign = a_sign;
-				o_exponent = a_exponent;
-				o_mantissa = a_mantissa;
-			//If b is NaN or a is zero return b
-			end else if ((b_exponent == 255 && b_mantissa != 0) || (a_exponent == 0) && (a_mantissa == 0)) begin
-				o_sign = b_sign;
-				o_exponent = b_exponent;
-				o_mantissa = b_mantissa;
-			//if a or b is inf return inf
-			end else if ((a_exponent == 255) || (b_exponent == 255)) begin
-				o_sign = a_sign ^ b_sign;
-				o_exponent = 255;
-				o_mantissa = 0;
-			end else begin // Passed all corner cases
-				adder_a_in = A;
-				adder_b_in = {~B[31], B[30:0]};
-				o_sign = adder_out[31];
-				o_exponent = adder_out[30:23];
-				o_mantissa = adder_out[22:0];
+			//If A is NaN or B is zero return A
+			if ((ExponentA == 255 && MantissaA != 0) || (ExponentB == 0) && (MantissaB == 0)) begin
+				SignO = SignA;
+				ExponentO = ExponentA;
+				MantissaO = MantissaA;
+			//If B is NaN or A is zero return B
+			end else if ((ExponentB == 255 && MantissaB != 0) || (ExponentA == 0) && (MantissaA == 0)) begin
+				SignO = SignB;
+				ExponentO = ExponentB;
+				MantissaO = MantissaB;
+			//if A or B is inf return inf
+			end else if ((ExponentA == 255) || (ExponentB == 255)) begin
+				SignO = SignA ^ SignB;
+				ExponentO = 255;
+				MantissaO = 0;
+			end else begin
+				InputAdderA = A;
+				InputAdderB = {~B[31], B[30:0]};
+				SignO = OutputAdder[31];
+				ExponentO = OutputAdder[30:23];
+				MantissaO = OutputAdder[22:0];
 			end
+		
+		// Opcode = ??? (Division)
 		end else if (DIV) begin
-			divider_a_in = A;
-			divider_b_in = B;
-			o_sign = divider_out[31];
-			o_exponent = divider_out[30:23];
-			o_mantissa = divider_out[22:0];
-		end else begin //Multiplication
-			//If a is NaN return NaN
-			if (a_exponent == 255 && a_mantissa != 0) begin
-				o_sign = a_sign;
-				o_exponent = 255;
-				o_mantissa = a_mantissa;
-			//If b is NaN return NaN
-			end else if (b_exponent == 255 && b_mantissa != 0) begin
-				o_sign = b_sign;
-				o_exponent = 255;
-				o_mantissa = b_mantissa;
-			//If a or b is 0 return 0
-			end else if ((a_exponent == 0) && (a_mantissa == 0) || (b_exponent == 0) && (b_mantissa == 0)) begin
-				o_sign = a_sign ^ b_sign;
-				o_exponent = 0;
-				o_mantissa = 0;
-			//if a or b is inf return inf
-			end else if ((a_exponent == 255) || (b_exponent == 255)) begin
-				o_sign = a_sign;
-				o_exponent = 255;
-				o_mantissa = 0;
-			end else begin // Passed all corner cases
-				multiplier_a_in = A;
-				multiplier_b_in = B;
-				o_sign = multiplier_out[31];
-				o_exponent = multiplier_out[30:23];
-				o_mantissa = multiplier_out[22:0];
+			InputDividerA = A;
+			InputDividerB = B;
+			SignO = OutputDivider[31];
+			ExponentO = OutputDivider[30:23];
+			MantissaO = OutputDivider[22:0];
+		
+		// Opcode = ??? (Multiplication)
+		end else begin
+			//If A is NaN return NaN
+			if (ExponentA == 255 && MantissaA != 0) begin
+				SignO = SignA;
+				ExponentO = 255;
+				MantissaO = MantissaA;
+			//If B is NaN return NaN
+			end else if (ExponentB == 255 && MantissaB != 0) begin
+				SignO = SignB;
+				ExponentO = 255;
+				MantissaO = MantissaB;
+			//If A or B is 0 return 0
+			end else if ((ExponentA == 0) && (MantissaA == 0) || (ExponentB == 0) && (MantissaB == 0)) begin
+				SignO = SignA ^ SignB;
+				ExponentO = 0;
+				MantissaO = 0;
+			//if A or B is inf return inf
+			end else if ((ExponentA == 255) || (ExponentB == 255)) begin
+				SignO = SignA;
+				ExponentO = 255;
+				MantissaO = 0;
+			end else begin
+				InputMultiplierA = A;
+				InputMultiplierB = B;
+				SignO = OutputMultiplier[31];
+				ExponentO = OutputMultiplier[30:23];
+				MantissaO = OutputMultiplier[22:0];
 			end
 		end
 	end

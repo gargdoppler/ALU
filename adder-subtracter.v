@@ -1,30 +1,32 @@
-
 module adder(a, b, out);
+  // Inputs
   input  [31:0] a, b;
+  
+  // Outputs
   output [31:0] out;
-
+  
+  // Wires
   wire [31:0] out;
+  wire [7:0] o_e;
+  wire [24:0] o_m;
+  
+  // Registers
 	reg a_sign;
 	reg [7:0] a_exponent;
 	reg [23:0] a_mantissa;
 	reg b_sign;
 	reg [7:0] b_exponent;
 	reg [23:0] b_mantissa;
-
   reg o_sign;
   reg [7:0] o_exponent;
   reg [24:0] o_mantissa;
-
   reg [7:0] diff;
   reg [23:0] tmp_mantissa;
   reg [7:0] tmp_exponent;
-
-
   reg  [7:0] i_e;
   reg  [24:0] i_m;
-  wire [7:0] o_e;
-  wire [24:0] o_m;
 
+  // Main
   addition_normaliser norm1
   (
     .in_e(i_e),
