@@ -9,7 +9,7 @@ module divider (A, B, Output);
 	// Wires
 	wire [31:0] ReciprocalB;
 
-	// Main
+	/* Connect modules to inputs and corresponding output wires */
 	reciprocal recip
 	(
 		.Input(B),

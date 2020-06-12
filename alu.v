@@ -6,36 +6,44 @@ module alu(clk, A, B, OpCode, O);
 	/* Assign wires and registers to the inputs and outputs */
 
 	// input clk
-	input clk;
+	input 					 clk;
 
 	// input OpCode
-	input [1:0] OpCode;
+	input [2:0] 		  OpCode;
 
 	// input A
-	input [31:0] A; 
-	wire [7:0] ExponentA;
-	wire [23:0] MantissaA;
-	reg [31:0] AdderAInput;
-	reg [31:0] MultiplierAInput;
-	reg [31:0] DividerAInput;
+	input [31:0]		  	   A; 
+	wire [7:0]		   ExponentA;
+	wire [23:0]        MantissaA;
+	reg [31:0]       AdderAInput;
+	reg [31:0]  MultiplierAInput;
+	reg [31:0] 	   DividerAInput;
+	reg [31:0]		   ANDAInput;
+	reg [31:0]			ORAInput;
+	reg [31:0]		   NOTAInput;
 	
 	// input B
-	input [31:0] B;
-	wire [7:0] ExponentB;
-	wire [23:0] MantissaB;
-	reg [31:0] AdderBInput;
-	reg [31:0] MultiplierBInput;
-	reg [31:0] DividerBInput;
+	input [31:0]			   B;
+	wire [7:0] 		   ExponentB;
+	wire [23:0]        MantissaB;
+	reg [31:0]       AdderBInput;
+	reg [31:0]  MultiplierBInput;
+	reg [31:0]     DividerBInput;
+	reg [31:0]		   ANDBInput;
+	reg [31:0]			ORBInput;
 
     // output O
-	output [31:0] O;
-	wire [31:0] O;
-	reg        SignO;
-	reg [7:0]ExponentO;
-	reg [24:0] MantissaO;
-	wire [31:0] AdderOutput;
+	output [31:0]        	   O;
+	wire [31:0] 			   O;
+	reg        			   SignO;
+	reg [7:0]          ExponentO;
+	reg [24:0] 		   MantissaO;
+	wire [31:0] 	 AdderOutput;
 	wire [31:0] MultiplierOutput;
-	wire [31:0] DividerOutput;
+	wire [31:0]    DividerOutput;
+	wire [31:0]    	   ANDOutput;
+	wire [31:0]    	    OROutput;
+	wire [31:0]    	   NOTOutput;
 
 
 	/* Assign values*/
@@ -55,11 +63,14 @@ module alu(clk, A, B, OpCode, O);
 	assign O[30:23] = ExponentO;
 	assign O[22:0] = MantissaO[22:0];
 
-	/* Choose operations based on OpCode */
-	assign ADD = !OpCode[1] & !OpCode[0];
-	assign SUB = !OpCode[1] & OpCode[0];
-	assign DIV = OpCode[1] & !OpCode[0];
-	assign MUL = OpCode[1] & OpCode[0];
+	/* Choose operations based on OpCode (Multiplexing) */
+	assign ADD = !OpCode[2] & !OpCode[1] & !OpCode[0];  // 000
+	assign SUB = !OpCode[2] & !OpCode[1] &  OpCode[0];  // 001
+	assign DIV = !OpCode[2] &  OpCode[1] & !OpCode[0];  // 010
+	assign MUL = !OpCode[2] &  OpCode[1] &  OpCode[0];  // 011
+	assign AND =  OpCode[2] & !OpCode[1] & !OpCode[0];  // 100
+	assign OR  =  OpCode[2] & !OpCode[1] &  OpCode[0];  // 101
+	assign NOT =  OpCode[2] &  OpCode[1] & !OpCode[0];  // 110
 
 
 	/* Connect modules to inputs and corresponding output wires */
@@ -84,10 +95,31 @@ module alu(clk, A, B, OpCode, O);
 		.Output(DividerOutput)
 	);
 
+	AND and1
+	(
+		.A(ANDAInput),
+		.B(ANDBInput),
+		.Output(ANDOutput)
+	);
+
+	OR or1
+	(
+		.A(ORAInput),
+		.B(ORBInput),
+		.Output(OROutput)
+	);
+
+	NOT not1
+	(
+		.A(NOTAInput),
+		.Output(NOTOutput)
+	);
+
+
 	/* Main logic*/
 	always @ (posedge clk) begin
-
-		// OpCode = ??? (Addition)
+		
+		/** Addition **/
 		if (ADD) begin
 			//If A is NaN or B is zero return A
 			if ((ExponentA == 255 && MantissaA != 0) || (ExponentB == 0) && (MantissaB == 0)) begin
@@ -112,7 +144,7 @@ module alu(clk, A, B, OpCode, O);
 				MantissaO = AdderOutput[22:0];
 			end
 		
-		// Opcode = ??? (Subtraction)
+		/** Subtraction **/
 		end else if (SUB) begin
 			//If A is NaN or B is zero return A
 			if ((ExponentA == 255 && MantissaA != 0) || (ExponentB == 0) && (MantissaB == 0)) begin
@@ -137,7 +169,7 @@ module alu(clk, A, B, OpCode, O);
 				MantissaO = AdderOutput[22:0];
 			end
 		
-		// Opcode = ??? (Division)
+		/** Division **/
 		end else if (DIV) begin
 			DividerAInput = A;
 			DividerBInput = B;
@@ -145,8 +177,8 @@ module alu(clk, A, B, OpCode, O);
 			ExponentO = DividerOutput[30:23];
 			MantissaO = DividerOutput[22:0];
 		
-		// Opcode = ??? (Multiplication)
-		end else begin
+		/** Multiplication **/
+		end else if (MUL) begin
 			//If A is NaN return NaN
 			if (ExponentA == 255 && MantissaA != 0) begin
 				SignO = SignA;
@@ -174,6 +206,30 @@ module alu(clk, A, B, OpCode, O);
 				ExponentO = MultiplierOutput[30:23];
 				MantissaO = MultiplierOutput[22:0];
 			end
+		
+		/** AND **/
+		end else if (AND) begin
+			ANDAInput = A;
+			ANDBInput = B;
+			SignO = ANDOutput[31];
+			ExponentO = ANDOutput[30:23];
+			MantissaO = ANDOutput[22:0];
+	
+		/** OR **/
+		end else if (OR) begin
+			ORAInput = A;
+			ORBInput = B;
+			SignO = OROutput[31];
+			ExponentO = OROutput[30:23];
+			MantissaO = OROutput[22:0];
+		
+		/** NOT **/
+		end else if (NOT) begin
+			NOTAInput = A;
+			SignO = NOTOutput[31];
+			ExponentO = NOTOutput[30:23];
+			MantissaO = NOTOutput[22:0];
+
 		end
 	end
 endmodule
