@@ -9,7 +9,7 @@ module alu(clk, A, B, OpCode, O);
 	input clk;
 
 	// input OpCode
-	input [1:0] OpCode;
+	input [2:0] OpCode;
 
 	// input A
 	input [31:0] A; 
