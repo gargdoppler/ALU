@@ -1,14 +1,21 @@
 module addition_normaliser(in_e, in_m, out_e, out_m);
+  // Inputs
   input [7:0] in_e;
   input [24:0] in_m;
+  
+  // Outputs
   output [7:0] out_e;
   output [24:0] out_m;
-
+  
+  // Wires
   wire [7:0] in_e;
   wire [24:0] in_m;
+  
+  // Registers
   reg [7:0] out_e;
   reg [24:0] out_m;
-
+  
+  // Main
   always @ ( * ) begin
 		if (in_m[23:3] == 21'b000000000000000000001) begin
 			out_e = in_e - 20;

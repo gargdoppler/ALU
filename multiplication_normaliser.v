@@ -1,14 +1,21 @@
 module multiplication_normaliser(in_e, in_m, out_e, out_m);
+  // Inputs
   input [7:0] in_e;
   input [47:0] in_m;
+
+  // Outputs
   output [7:0] out_e;
   output [47:0] out_m;
 
+  // Wires
   wire [7:0] in_e;
   wire [47:0] in_m;
+
+  // Registers
   reg [7:0] out_e;
   reg [47:0] out_m;
 
+  // Main
   always @ ( * ) begin
 	  if (in_m[46:41] == 6'b000001) begin
 			out_e = in_e - 5;
