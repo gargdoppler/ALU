@@ -9,13 +9,43 @@ def binary(num):
     return ''.join(bin(c).replace('0b', '').rjust(8, '0') for c in struct.pack('!f', num))
 
 
+def bitwiseAND(a, b):
+    A = binary(a)
+    B = binary(b)
+    C = ''
+    for i in range(32):
+        if(int(A[i]) and int(B[i])):
+            C += '1'
+        else:
+            C += '0'
+    return C
+
+def bitwiseOR(a, b):
+    A = binary(a)
+    B = binary(b)
+    C = ''
+    for i in range(32):
+        if(int(A[i]) or int(B[i])):
+            C += '1'
+        else:
+            C += '0'
+    return C
+
+def logicalNOT(a):
+    A = binary(a)
+    for i in range(32):
+        if(int(A[i])):
+            return '1'
+    return '0'
+
+
 f = open("alu_tb.v", 'w')
 op = str(sys.argv[1])
 numTests = int(sys.argv[2])
 
 
 f.write(
-'`timescale 1 ns/100 ps\n\
+    '`timescale 1 ns/100 ps\n\
 `include "alu.v"\n\n\n\
 module alu_tb ();\n\
     reg clock;\n\
@@ -43,77 +73,80 @@ module alu_tb ();\n\
 # Map input opcodes to the Test bench file
 
 if(op == "000"):
-    # ADD
+    operation = "ADD"
     f.write("000")
 elif(op == "001"):
-    # SUB
+    operation = "SUB"
     f.write("001")
 elif(op == "010"):
-    # DIV
+    operation = "DIV"
     f.write("010")
 elif(op == "011"):
-    # MUL
+    operation = "MUL"
     f.write("011")
 elif(op == "100"):
-    # AND
+    operation = "AND"
     f.write("100")
 elif(op == "101"):
-    # OR
+    operation = "OR"
     f.write("101")
 elif(op == "110"):
-    # NOT
+    operation = "NOT"
     f.write("110")
 
+f.write(
+f';\n\n\t\t/* Display the operation */\n\
+\t\t$display ("Opcode: %d, Operation: {operation}", {op});\n\
+\t\t/* Test Cases!*/\n')
 
-f.write(";\n\n    /* Test Cases!*/\n\n")
 
 # Generate test cases
 for n in range(0, numTests):
     # If we get a FloatingPointError: invalid value encountered in add
     # then decrement n and try again
-    try:
-        byte = np.random.bytes(4)
-        a = np.frombuffer(byte, dtype=np.float32)
-        byte = np.random.bytes(4)
-        b = np.frombuffer(byte, dtype=np.float32)
-        
-        if(op == "000"):
-            result = a + b
-        elif(op == "001"):
-            result = a - b
-        elif(op == "010"):
-            result = a / b
-        elif(op == "011"):
-            result = a * b
-        elif(op == "100"):
-            result = a & b
-        elif(op == "101"):
-            result = a | b
-        elif(op == "110"):
-            result = not a
+    # try:
+    byte = np.random.bytes(4)
+    a = np.frombuffer(byte, dtype=np.float32)
+    byte = np.random.bytes(4)
+    b = np.frombuffer(byte, dtype=np.float32)
 
-        f.write("\t\ta = 32'b" + binary(a) + ";\n")
-        f.write("\t\tb = 32'b" + binary(b) + ";\n")
-        f.write("\t\tcorrect = 32'b" + binary(result) + ";\n")
-        f.write("\t\t#400 //" + str(a[0]) + " * " +
-                str(b[0]) + " = " + str(result[0]) + "\n\t\t")
-        if(op == "000"):
-            f.write("begin\n")
-        elif(op == "001"):
-            f.write("begin\n")
-        elif(op == "010"):
-            f.write("begin\n")
-        elif(op == "011"):
-            f.write("begin\n")
-        f.write(
-            "\t\t\t$display (\"A      : %b %b %b\", a[31], a[30:23], a[22:0]);\n")
-        f.write(
-            "\t\t\t$display (\"B      : %b %b %b\", b[31], b[30:23], b[22:0]);\n")
-        f.write(
-            "\t\t\t$display (\"Output : %b %b %b\", correct[31], correct[30:23], correct[22:0]);\n")
-        f.write(
-            "\t\t\t$display (\"Correct: %b %b %b\", correct[31], correct[30:23], correct[22:0]); $display();\n\t\tend\n\n")
-    except:
-        n -= 1
+    if(op == "000"):
+        result = a + b
+    elif(op == "001"):
+        result = a - b
+    elif(op == "010"):
+        result = a / b
+    elif(op == "011"):
+        result = a * b
+    elif(op == "100"):
+        result = bitwiseAND(a, b)
+    elif(op == "101"):
+        result = bitwiseOR(a, b)
+    elif(op == "110"):
+        result = logicalNOT(a)
+
+    f.write("\t\ta = 32'b" + binary(a) + ";\n")
+    f.write("\t\tb = 32'b" + binary(b) + ";\n")
+    f.write("\t\tcorrect = 32'b" + binary(result) + ";\n")
+    f.write("\t\t#400 //" + str(a[0]) + " * " +
+            str(b[0]) + " = " + str(result[0]) + "\n\t\t")
+    if(op == "000"):
+        f.write("begin\n")
+    elif(op == "001"):
+        f.write("begin\n")
+    elif(op == "010"):
+        f.write("begin\n")
+    elif(op == "011"):
+        f.write("begin\n")
+    f.write(
+        "\t\t\t$display (\"A      : %b %b %b\", a[31], a[30:23], a[22:0]);\n")
+    f.write(
+        "\t\t\t$display (\"B      : %b %b %b\", b[31], b[30:23], b[22:0]);\n")
+    f.write(
+        "\t\t\t$display (\"Output : %b %b %b\", correct[31], correct[30:23], correct[22:0]);\n")
+    f.write(
+        "\t\t\t$display (\"Correct: %b %b %b\", correct[31], correct[30:23], correct[22:0]); $display();\n\t\tend\n\n")
+    # except:
+    #n -= 1
 
 f.write("\t\t$display (\"Done.\");\n\t\t$finish;\n\tend\n\nendmodule")
