@@ -9,7 +9,7 @@ Design an IEEE floating-point single-precision (32-bit) ALU that supports the ar
 
 Install Icarius verilog: http://iverilog.icarus.com/
 
-- Generate testbench file: `python3 generate_testbench_file.py <OpCode> <no. of test cases>`
+- Generate testbench file: `python3 testbench_gen.py <OpCode> <no. of test cases>`
 - Compile the testbench file: `iverilog -o alu alu_tb.v`
 - Run the alu file: `vvp alu`
 
