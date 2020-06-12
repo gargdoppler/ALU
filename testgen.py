@@ -86,9 +86,9 @@ for n in range(0, numTests):
         elif(op == "011"):
             result = a * b
         elif(op == "100"):
-            result = a and b
+            result = a & b
         elif(op == "101"):
-            result = a or b
+            result = a | b
         elif(op == "110"):
             result = not a
 
