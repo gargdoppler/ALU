@@ -9,12 +9,12 @@ def binary(num):
     return ''.join(bin(c).replace('0b', '').rjust(8, '0') for c in struct.pack('!f', num))
 
 
-f = open("fpu_tb.v", 'w')
+f = open("alu_tb.v", 'w')
 op = str(sys.argv[1])
 numTests = int(sys.argv[2])
 
 f.write(
-    "//-----------------------------------------------------------\n// File: fpu_tb.v\n// FPU Test Bench\n//-----------------------------------------------------------\n`timescale 1 ns/100 ps\nmodule fpu_tb ();\n //----------------------------------------------------------\n // inputs to the DUT are reg type\n reg clock;\n reg [31:0] a, b;\n reg [1:0] op;\n reg [31:0] correct;\n //----------------------------------------------------------\n // outputs from the DUT are wire type\n wire [31:0] out;\n wire [49:0] pro;\n //----------------------------------------------------------\n // instantiate the Device Under Test (DUT)\n // using named instantiation\n fpu U1 (\n          .clk(clock),\n          .A(a),\n          .B(b),\n          .opcode(op),\n          .O(out)\n        );\n //----------------------------------------------------------\n // create a 10Mhz clock\n always\n #100 clock = ~clock; // every 100 nanoseconds invert\n //----------------------------------------------------------\n // initial blocks are sequential and start at time 0\n initial\n begin\n $dumpfile(\"fpu_tb.vcd\");\n $dumpvars(0,clock, a, b, op, out);\n clock = 0;")
+    '//-----------------------------------------------------------\n// File: alu_tb.v\n// alu Test Bench\n//-----------------------------------------------------------\n`timescale 1 ns/100 ps\n`include "alu.v"\nmodule alu_tb ();\n //----------------------------------------------------------\n // inputs to the DUT are reg type\n reg clock;\n reg [31:0] a, b;\n reg [1:0] op;\n reg [31:0] correct;\n //----------------------------------------------------------\n // outputs from the DUT are wire type\n wire [31:0] out;\n wire [49:0] pro;\n //----------------------------------------------------------\n // instantiate the Device Under Test (DUT)\n // using named instantiation\n alu U1 (\n          .clk(clock),\n          .A(a),\n          .B(b),\n          .opcode(op),\n          .O(out)\n        );\n //----------------------------------------------------------\n // create a 10Mhz clock\n always\n #100 clock = ~clock; // every 100 nanoseconds invert\n //----------------------------------------------------------\n // initial blocks are sequential and start at time 0\n initial\n begin\n $dumpfile(\"alu_tb.vcd\");\n $dumpvars(0,clock, a, b, op, out);\n clock = 0;')
 
 if(op == "000"):
     f.write("op = 2'b00;\n")

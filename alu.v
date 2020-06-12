@@ -1,7 +1,6 @@
 `include "modules.v"
 
-//IEEE 754 Single Precision ALU
-module fpu(clk, A, B, opcode, O);
+module alu(clk, A, B, opcode, O);
 	input clk;
 	input [31:0] A, B;
 	input [1:0] opcode;
