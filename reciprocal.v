@@ -35,59 +35,59 @@ module reciprocal (in, out);
 	//S0
 	multiplier S0_2D
 	(
-		.a(C2),
-		.b(D),
+		.A(C2),
+		.B(D),
 		.out(S0_2D_out)
 	);
 
 	adder S0_N0
 	(
-		.a(C1),
-		.b(S0_N0_in),
+		.A(C1),
+		.B(S0_N0_in),
 		.out(N0)
 	);
 
 	//S1
 	multiplier S1_DN0
 	(
-		.a(D),
-		.b(N0),
+		.A(D),
+		.B(N0),
 		.out(S1_DN0_out)
 	);
 
 	adder S1_2minDN0
 	(
-		.a(C3),
-		.b({~S1_DN0_out[31], S1_DN0_out[30:0]}),
+		.A(C3),
+		.B({~S1_DN0_out[31], S1_DN0_out[30:0]}),
 		.out(S1_2min_DN0_out)
 	);
 
 	multiplier S1_N1
 	(
-		.a(N0),
-		.b(S1_2min_DN0_out),
+		.A(N0),
+		.B(S1_2min_DN0_out),
 		.out(N1)
 	);
 
 	//S2
 	multiplier S2_DN1
 	(
-		.a(D),
-		.b(N1),
+		.A(D),
+		.B(N1),
 		.out(S2_DN1_out)
 	);
 
 	adder S2_2minDN1
 	(
-		.a(C3),
-		.b({~S2_DN1_out[31], S2_DN1_out[30:0]}),
+		.A(C3),
+		.B({~S2_DN1_out[31], S2_DN1_out[30:0]}),
 		.out(S2_2minDN1_out)
 	);
 
 	multiplier S2_N2
 	(
-		.a(N1),
-		.b(S2_2minDN1_out),
+		.A(N1),
+		.B(S2_2minDN1_out),
 		.out(N2)
 	);
 

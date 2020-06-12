@@ -1,6 +1,6 @@
-module adder(a, b, out);
+module adder(A, B, out);
   // Inputs
-  input  [31:0] a, b;
+  input  [31:0] A, B;
   
   // Outputs
   output [31:0] out;
@@ -40,21 +40,21 @@ module adder(a, b, out);
   assign out[22:0] = o_mantissa[22:0];
 
   always @ ( * ) begin
-		a_sign = a[31];
-		if(a[30:23] == 0) begin
+		a_sign = A[31];
+		if(A[30:23] == 0) begin
 			a_exponent = 8'b00000001;
-			a_mantissa = {1'b0, a[22:0]};
+			a_mantissa = {1'b0, A[22:0]};
 		end else begin
-			a_exponent = a[30:23];
-			a_mantissa = {1'b1, a[22:0]};
+			a_exponent = A[30:23];
+			a_mantissa = {1'b1, A[22:0]};
 		end
-		b_sign = b[31];
-		if(b[30:23] == 0) begin
+		b_sign = B[31];
+		if(B[30:23] == 0) begin
 			b_exponent = 8'b00000001;
-			b_mantissa = {1'b0, b[22:0]};
+			b_mantissa = {1'b0, B[22:0]};
 		end else begin
-			b_exponent = b[30:23];
-			b_mantissa = {1'b1, b[22:0]};
+			b_exponent = B[30:23];
+			b_mantissa = {1'b1, B[22:0]};
 		end
     if (a_exponent == b_exponent) begin // Equal exponents
       o_exponent = a_exponent;
