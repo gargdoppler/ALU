@@ -1,12 +1,12 @@
-module adder(A, B, out);
+module adder(A, B, Output);
   // Inputs
   input  [31:0] A, B;
   
   // Outputs
-  output [31:0] out;
+  output [31:0] Output;
   
   // Wires
-  wire [31:0] out;
+  wire [31:0] Output;
   wire [7:0] o_e;
   wire [24:0] o_m;
   
@@ -35,9 +35,9 @@ module adder(A, B, out);
     .out_m(o_m)
   );
 
-  assign out[31] = o_sign;
-  assign out[30:23] = o_exponent;
-  assign out[22:0] = o_mantissa[22:0];
+  assign Output[31] = o_sign;
+  assign Output[30:23] = o_exponent;
+  assign Output[22:0] = o_mantissa[22:0];
 
   always @ ( * ) begin
 		a_sign = A[31];

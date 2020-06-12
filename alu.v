@@ -15,27 +15,27 @@ module alu(clk, A, B, OpCode, O);
 	input [31:0] A; 
 	wire [7:0] ExponentA;
 	wire [23:0] MantissaA;
-	reg [31:0] InputAdderA;
-	reg [31:0] InputMultiplierA;
-	reg [31:0] InputDividerA;
+	reg [31:0] AdderAInput;
+	reg [31:0] MultiplierAInput;
+	reg [31:0] DividerAInput;
 	
 	// input B
 	input [31:0] B;
 	wire [7:0] ExponentB;
 	wire [23:0] MantissaB;
-	reg [31:0] InputAdderB;
-	reg [31:0] InputMultiplierB;
-	reg [31:0] InputDividerB;
+	reg [31:0] AdderBInput;
+	reg [31:0] MultiplierBInput;
+	reg [31:0] DividerBInput;
 
     // output O
 	output [31:0] O;
 	wire [31:0] O;
 	reg        SignO;
-	reg [7:0]  ExponentO;
+	reg [7:0]ExponentO;
 	reg [24:0] MantissaO;
-	wire [31:0] OutputAdder;
-	wire [31:0] OutputMultiplier;
-	wire [31:0] OutputDivider;
+	wire [31:0] AdderOutput;
+	wire [31:0] MultiplierOutput;
+	wire [31:0] DividerOutput;
 
 
 	/* Assign values*/
@@ -65,23 +65,23 @@ module alu(clk, A, B, OpCode, O);
 	/* Connect modules to inputs and corresponding output wires */
 	adder A1
 	(
-		.A(InputAdderA),
-		.B(InputAdderB),
-		.out(OutputAdder)
+		.A(AdderAInput),
+		.B(AdderBInput),
+		.Output(AdderOutput)
 	);
 
 	multiplier M1
 	(
-		.A(InputMultiplierA),
-		.B(InputMultiplierB),
-		.out(OutputMultiplier)
+		.A(MultiplierAInput),
+		.B(MultiplierBInput),
+		.Output(MultiplierOutput)
 	);
 
 	divider D1
 	(
-		.A(InputDividerA),
-		.B(InputDividerB),
-		.out(OutputDivider)
+		.A(DividerAInput),
+		.B(DividerBInput),
+		.Output(DividerOutput)
 	);
 
 	/* Main logic*/
@@ -105,11 +105,11 @@ module alu(clk, A, B, OpCode, O);
 				ExponentO = 255;
 				MantissaO = 0;
 			end else begin
-				InputAdderA = A;
-				InputAdderB = B;
-				SignO = OutputAdder[31];
-				ExponentO = OutputAdder[30:23];
-				MantissaO = OutputAdder[22:0];
+				AdderAInput = A;
+				AdderBInput = B;
+				SignO = AdderOutput[31];
+				ExponentO = AdderOutput[30:23];
+				MantissaO = AdderOutput[22:0];
 			end
 		
 		// Opcode = ??? (Subtraction)
@@ -130,20 +130,20 @@ module alu(clk, A, B, OpCode, O);
 				ExponentO = 255;
 				MantissaO = 0;
 			end else begin
-				InputAdderA = A;
-				InputAdderB = {~B[31], B[30:0]};
-				SignO = OutputAdder[31];
-				ExponentO = OutputAdder[30:23];
-				MantissaO = OutputAdder[22:0];
+				AdderAInput = A;
+				AdderBInput = {~B[31], B[30:0]};
+				SignO = AdderOutput[31];
+				ExponentO = AdderOutput[30:23];
+				MantissaO = AdderOutput[22:0];
 			end
 		
 		// Opcode = ??? (Division)
 		end else if (DIV) begin
-			InputDividerA = A;
-			InputDividerB = B;
-			SignO = OutputDivider[31];
-			ExponentO = OutputDivider[30:23];
-			MantissaO = OutputDivider[22:0];
+			DividerAInput = A;
+			DividerBInput = B;
+			SignO = DividerOutput[31];
+			ExponentO = DividerOutput[30:23];
+			MantissaO = DividerOutput[22:0];
 		
 		// Opcode = ??? (Multiplication)
 		end else begin
@@ -168,11 +168,11 @@ module alu(clk, A, B, OpCode, O);
 				ExponentO = 255;
 				MantissaO = 0;
 			end else begin
-				InputMultiplierA = A;
-				InputMultiplierB = B;
-				SignO = OutputMultiplier[31];
-				ExponentO = OutputMultiplier[30:23];
-				MantissaO = OutputMultiplier[22:0];
+				MultiplierAInput = A;
+				MultiplierBInput = B;
+				SignO = MultiplierOutput[31];
+				ExponentO = MultiplierOutput[30:23];
+				MantissaO = MultiplierOutput[22:0];
 			end
 		end
 	end

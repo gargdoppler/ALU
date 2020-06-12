@@ -1,25 +1,25 @@
-module divider (A, B, out);
+module divider (A, B, Output);
 	// Inputs
 	input [31:0] A;
 	input [31:0] B;
 
 	// Outputs
-	output [31:0] out;
+	output [31:0] Output;
 
 	// Wires
-	wire [31:0] b_reciprocal;
+	wire [31:0] ReciprocalB;
 
 	// Main
 	reciprocal recip
 	(
-		.in(B),
-		.out(b_reciprocal)
+		.Input(B),
+		.Output(ReciprocalB)
 	);
 
 	multiplier mult
 	(
 		.A(A),
-		.B(b_reciprocal),
-		.out(out)
+		.B(ReciprocalB),
+		.Output(Output)
 	);
 endmodule
