@@ -50,60 +50,68 @@ op = str(sys.argv[1])
 numTests = int(sys.argv[2])
 
 
-f.write(
-    '`timescale 1 ns/100 ps\n\
-`include "alu.v"\n\n\n\
-module alu_tb ();\n\
-    reg clock;\n\
-    reg [31:0] a, b;\n\
-    reg [2:0] op;\n\
-    reg [31:0] correct;\n\n\
-    wire [31:0] out;\n\
-    wire [49:0] pro;\n\n\
-    alu U1 (\n\
-            .clk(clock),\n\
-            .A(a),\n\
-            .B(b),\n\
-            .OpCode(op),\n\
-            .O(out)\n\
-        );\n\
-    /* create a 10Mhz clock */\n\
-    always\n\
-    #100 clock = ~clock; // every 100 nanoseconds invert\n\
-    initial begin\n\
-        $dumpfile(\"alu_tb.vcd\");\n\
-        $dumpvars(0,clock, a, b, op, out);\n\
-        clock = 0;\n\n    op = 3\'b')
+def changeModule(mod_name):
+    f.write(
+        '`timescale 1 ns/1 ps\n\
+    `include "'+mod_name+'.v"\n\n\n\
+    module alu_tb ();\n\
+        reg clock;\n\
+        reg [31:0] a, b;\n\
+        reg [2:0] op;\n\
+        reg [31:0] correct;\n\n\
+        wire [31:0] out;\n\
+        wire [49:0] pro;\n\n\
+        alu U1 (\n\
+                .clk(clock),\n\
+                .A(a),\n\
+                .B(b),\n\
+                .OpCode(op),\n\
+                .O(out)\n\
+            );\n\
+        /* create a 10Mhz clock */\n\
+        always\n\
+        #100 clock = ~clock; // every 100 nanoseconds invert\n\
+        initial begin\n\
+            $dumpfile(\"alu_tb.vcd\");\n\
+            $dumpvars(0,clock, a, b, op, out);\n\
+            clock = 0;\n\n    op = 3\'b')
 
 
 # Map input opcodes to the Test bench file
 if(op == "000"):
     operation = "ADD"
     os.rename(r'alu_tb.v', r'add_tb.v')
+    changeModule("add")
     f.write("000")
 elif(op == "001"):
     operation = "SUB"
     os.rename(r'alu_tb.v', r'sub_tb.v')
+    changeModule("sub")
     f.write("001")
 elif(op == "010"):
     operation = "DIV"
     os.rename(r'alu_tb.v', r'mul_tb.v')
+    changeModule("div")
     f.write("010")
 elif(op == "011"):
     operation = "MUL"
     os.rename(r'alu_tb.v', r'div_tb.v')
+    changeModule("mul")
     f.write("011")
 elif(op == "100"):
     operation = "AND"
     os.rename(r'alu_tb.v', r'and_tb.v')
+    changeModule("and")
     f.write("100")
 elif(op == "101"):
     operation = "OR"
     os.rename(r'alu_tb.v', r'or_tb.v')
+    changeModule("or")
     f.write("101")
 elif(op == "110"):
     operation = "NOT"
     os.rename(r'alu_tb.v', r'not_tb.v')
+    changeModule("not")
     f.write("110")
 
 f.write(
