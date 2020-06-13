@@ -1,7 +1,6 @@
 `timescale 1 ns/100 ps
 `include "alu.v"
 
-
 module alu_tb ();
     reg clock;
     reg [31:0] a, b;
@@ -27,7 +26,6 @@ module alu_tb ();
         clock = 0;
 
     op = 3'b000;
-
 		/* Display the operation */
 		$display ("Opcode: 000, Operation: ADD");
 		/* Test Cases!*/
