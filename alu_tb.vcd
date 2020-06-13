@@ -1,0 +1,33 @@
+$date
+	Sat Jun 13 21:19:03 2020
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	100ps
+$end
+$scope module alu_tb $end
+$var reg 1 ! clock $end
+$upscope $end
+$scope module alu_tb $end
+$var reg 32 " a [31:0] $end
+$upscope $end
+$scope module alu_tb $end
+$var reg 32 # b [31:0] $end
+$upscope $end
+$scope module alu_tb $end
+$var reg 3 $ op [2:0] $end
+$upscope $end
+$scope module alu_tb $end
+$var wire 32 % out [31:0] $end
+$upscope $end
+$enddefinitions $end
+#0
+$dumpvars
+bx %
+b110 $
+bx #
+b110101010110110001011100011011 "
+0!
+$end

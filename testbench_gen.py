@@ -1,8 +1,9 @@
 import struct
 import sys
 import numpy as np
-
+import os
 np.seterr(all='raise')
+fail = 0
 
 
 def binary(num):
@@ -33,12 +34,15 @@ def bitwiseOR(a, b):
     return C
 
 
-def logicalNOT(a):
+def bitwiseNOT(a):
     A = binary(a)
+    B = ''
     for i in range(32):
         if(int(A[i])):
-            return '1'
-    return '0'
+            B += '0'
+        else:
+            B += '1'
+    return B
 
 
 f = open("alu_tb.v", 'w')
@@ -75,24 +79,31 @@ module alu_tb ();\n\
 # Map input opcodes to the Test bench file
 if(op == "000"):
     operation = "ADD"
+    os.rename(r'alu_tb.v', r'add_tb.v')
     f.write("000")
 elif(op == "001"):
     operation = "SUB"
+    os.rename(r'alu_tb.v', r'sub_tb.v')
     f.write("001")
 elif(op == "010"):
     operation = "DIV"
+    os.rename(r'alu_tb.v', r'mul_tb.v')
     f.write("010")
 elif(op == "011"):
     operation = "MUL"
+    os.rename(r'alu_tb.v', r'div_tb.v')
     f.write("011")
 elif(op == "100"):
     operation = "AND"
+    os.rename(r'alu_tb.v', r'and_tb.v')
     f.write("100")
 elif(op == "101"):
     operation = "OR"
+    os.rename(r'alu_tb.v', r'or_tb.v')
     f.write("101")
 elif(op == "110"):
     operation = "NOT"
+    os.rename(r'alu_tb.v', r'not_tb.v')
     f.write("110")
 
 f.write(
@@ -113,6 +124,7 @@ for n in range(0, numTests):
 
         if(op == "000"):
             result = a + b
+
         elif(op == "001"):
             result = a - b
         elif(op == "010"):
@@ -124,28 +136,48 @@ for n in range(0, numTests):
         elif(op == "101"):
             result = bitwiseOR(a, b)
         elif(op == "110"):
-            result = logicalNOT(a)
+            result = bitwiseNOT(a)
 
-        f.write("\t\ta = 32'b" + binary(a) + ";\n")
-        f.write("\t\tb = 32'b" + binary(b) + ";\n")
+        if(not(op == "110")):
+            f.write("\t\ta = 32'b" + binary(a) + ";\n")
+            f.write("\t\tb = 32'b" + binary(b) + ";\n")
 
-        if(str(type(result)) == "<class 'str'>"):
-            f.write("\t\tcorrect = 32'b" + result + ";\n")
+            if(str(type(result)) == "<class 'str'>"):
+                f.write("\t\tcorrect = 32'b" + result + ";\n")
+            else:
+                f.write("\t\tcorrect = 32'b" + binary(result) + ";\n")
+                f.write("\t\t#400 //" + str(a[0]) + " * " +
+                        str(b[0]) + " = " + str(result[0]) + "\n\t\t")
+
+            f.write("\t\t\tbegin\n")
+            f.write(
+                "\t\t\t$display (\"A      : %b %b %b\", a[31], a[30:23], a[22:0]);\n")
+            f.write(
+                "\t\t\t$display (\"B      : %b %b %b\", b[31], b[30:23], b[22:0]);\n")
+            f.write(
+                "\t\t\t$display (\"Output : %b %b %b\", correct[31], correct[30:23], correct[22:0]);\n")
+            f.write(
+                "\t\t\t$display (\"Correct: %b %b %b\", correct[31], correct[30:23], correct[22:0]); $display();\n\t\tend\n\n")
         else:
-            f.write("\t\tcorrect = 32'b" + binary(result) + ";\n")
-            f.write("\t\t#400 //" + str(a[0]) + " * " +
-                    str(b[0]) + " = " + str(result[0]) + "\n\t\t")
+            f.write("\t\ta = 32'b" + binary(a) + ";\n")
+            if(str(type(result)) == "<class 'str'>"):
+                f.write("\t\tcorrect = 32'b" + result + ";\n")
+            else:
+                f.write("\t\tcorrect = 32'b" + binary(result) + ";\n")
+                f.write("\t\t#400 //" + str(a[0]) + " * " +
+                        str(b[0]) + " = " + str(result[0]) + "\n\t\t")
 
-        f.write("\t\t\tbegin\n")
-        f.write(
-            "\t\t\t$display (\"A      : %b %b %b\", a[31], a[30:23], a[22:0]);\n")
-        f.write(
-            "\t\t\t$display (\"B      : %b %b %b\", b[31], b[30:23], b[22:0]);\n")
-        f.write(
-            "\t\t\t$display (\"Output : %b %b %b\", correct[31], correct[30:23], correct[22:0]);\n")
-        f.write(
-            "\t\t\t$display (\"Correct: %b %b %b\", correct[31], correct[30:23], correct[22:0]); $display();\n\t\tend\n\n")
+            f.write("\t\t\tbegin\n")
+            f.write(
+                "\t\t\t$display (\"A      : %b %b %b\", a[31], a[30:23], a[22:0]);\n")
+            f.write(
+                "\t\t\t$display (\"Output : %b %b %b\", correct[31], correct[30:23], correct[22:0]);\n")
+            f.write(
+                "\t\t\t$display (\"Correct: %b %b %b\", correct[31], correct[30:23], correct[22:0]); $display();\n\t\tend\n\n")
     except:
+        fail += 1
         n -= 1
-
+print("Total cases:        " + str(numTests))
+print("Total cases passed: " + str(numTests-fail))
+print("Total cases failed: " + str(fail))
 f.write("\t\t$display (\"Done.\");\n\t\t$finish;\n\tend\n\nendmodule")
