@@ -53,8 +53,8 @@ numTests = int(sys.argv[2])
 def changeModule(mod_name):
     f.write(
         '`timescale 1 ns/1 ps\n\
-    `include "'+mod_name+'.v"\n\n\n\
-    module alu_tb ();\n\
+    `include "alu.v"\n\n\n\
+    module '+mod_name+'_tb ();\n\
         reg clock;\n\
         reg [31:0] a, b;\n\
         reg [2:0] op;\n\
