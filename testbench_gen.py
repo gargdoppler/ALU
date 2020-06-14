@@ -164,8 +164,8 @@ for n in range(0, numTests):
                 "\t\t\t$display (\"B      : %b %b %b\", b[31], b[30:23], b[22:0]);\n")
             f.write(
                 "\t\t\t$display (\"Output : %b %b %b\", correct[31], correct[30:23], correct[22:0]);\n")
-            f.write(
-                "\t\t\t$display (\"Correct: %b %b %b\", correct[31], correct[30:23], correct[22:0]); $display();\n\t\tend\n\n")
+            # f.write(
+            #     "\t\t\t$display (\"Correct: %b %b %b\", correct[31], correct[30:23], correct[22:0]); $display();\n\t\tend\n\n")
         else:
             f.write("\t\ta = 32'b" + binary(a) + ";\n")
             if(str(type(result)) == "<class 'str'>"):
@@ -180,8 +180,8 @@ for n in range(0, numTests):
                 "\t\t\t$display (\"A      : %b %b %b\", a[31], a[30:23], a[22:0]);\n")
             f.write(
                 "\t\t\t$display (\"Output : %b %b %b\", correct[31], correct[30:23], correct[22:0]);\n")
-            f.write(
-                "\t\t\t$display (\"Correct: %b %b %b\", correct[31], correct[30:23], correct[22:0]); $display();\n\t\tend\n\n")
+            # f.write(
+            #     "\t\t\t$display (\"Correct: %b %b %b\", correct[31], correct[30:23], correct[22:0]); $display();\n\t\tend\n\n")
     except:
         fail += 1
         n -= 1
